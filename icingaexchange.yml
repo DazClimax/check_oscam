@@ -1,0 +1,19 @@
+name: check_oscam
+description: "file:///README.md"
+url: "https://github.com/DazClimax/check_oscam.git"
+tags: Statistic
+vendor: Linux
+target: Operating System
+type: Plugin
+license: gplv3
+releases: 
+  - 
+    name: 1.0
+    description: "1.0 Release"
+    files: 
+      - 
+        name: check_oscam
+        url: "file:///check_oscam"
+        description: "First release"
+        checksum: f2dcd9177276419aecdb95c5d801641b
+

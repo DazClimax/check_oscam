@@ -44,7 +44,7 @@ object CheckCommand "oscam" {
 ### Use plugin
 
 ```sh
-object Service "Entitlement Sky" {
+object Service "Entitlement NAME" {
          import "generic-service"
          host_name = "OSCAM"
          check_command = "oscam"

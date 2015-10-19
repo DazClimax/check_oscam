@@ -1,0 +1,123 @@
+#! /usr/bin/perl -w
+
+use strict;
+use warnings;
+use Time::Local;
+use Date::Manip;
+use Math::Round;
+use Getopt::Long;
+use Scalar::MoreUtils qw(empty);
+
+#Define variabels
+my $hostname = "";
+my $user = "";
+my $password ="";
+my $reader = "";
+my $subscription = "";
+my $help = "";
+my $warningtime = 14; #days
+my $criticaltime = 1; #days
+
+# Read variables
+Getopt::Long::Configure('bundling');
+GetOptions(
+         "H=s"	=> \$hostname,		"hostname"	=> \$hostname,
+         "u=s"	=> \$user,		"user"		=> \$user,
+         "p=s"	=> \$password,		"password"      => \$password,
+         "r=s"	=> \$reader, 		"reader" 	=> \$reader,
+         "i=s"	=> \$subscription, 	"subscription" 	=> \$subscription,
+         "w=i"	=> \$warningtime, 	"warningtime" 	=> \$warningtime,
+         "c=i"	=> \$criticaltime, 	"criticaltime" 	=> \$criticaltime,
+	 "h"	=> \$help,		"help"		=> \$help);
+
+# Check variables and start checking oscam
+if ($hostname and $user and $password and $reader and $subscription) {
+  check_entitlement();
+  exit;
+} elsif ($help or empty($help)){
+  print_help();
+}
+
+# Print help
+sub print_help{
+  print "\n";
+  print "Usage:\n";
+  print "  check_oscam -H <IP> -u <user> -p <password> -r <reader -s <id> [-w <days>] [-c <days>]\n";
+  print "  check_oscam [-h | --help]\n";
+  print "\n";
+  print "  Warning and critical values are optional, default warning is 14 days and default critial is 1 day all other values are needed\n";
+  print "\n";
+  exit;
+}
+
+#Check the Entitlement
+sub check_entitlement{
+  my ($hours, $status, $daysleft);
+  
+  $hours = get_diff();
+  $daysleft = round($hours / 24);
+  
+
+  if ($hours > ($warningtime * 24)) {
+    print "Entitlement OK: Entitlement expire at ".get_entitlementdate().$daysleft." days left before update of Entitlement is needed";
+    print "\n";
+    exit 0;
+  } elsif ($hours < ($criticaltime * 24)) {
+    print "Entitlement CRTITICAL: Entitlement expire at ".get_entitlementdate().$daysleft."days left before update of Entitlement is needed";
+    print "\n";
+    exit 2;
+  } elsif ($hours < ($warningtime * 24)) {
+    print "Entitlement WARNING: Entitlement expire at ".get_entitlementdate().$daysleft." days left before update of Entitlement is needed";
+    print "\n";
+    exit 1;
+  }
+}
+
+# Get the time between the Entitlement is gone and the actual date in hours
+sub get_diff{
+  my ($entitlementdate, $actualdate, $predelta, $hours, @delta);
+  
+  $entitlementdate = ParseDate(get_entitlementdate());
+  $actualdate = ParseDate(now("%Y-%m-%d"));
+  $predelta = DateCalc($actualdate,$entitlementdate);
+  
+  @delta=split(/:/,$predelta);
+  $hours = $delta[4];
+  
+  return $hours;
+}
+
+# Get Entitlmentdate from oscam
+sub get_entitlementdate{
+  my ($url, $entitlementdate);
+  
+  $url = "curl --digest -s -u ".$user.":".$password." http://".$hostname."/entitlements.html?label=".$reader. " | grep \".$subscription.\" | awk -F\"<TD>\" {'print \$8'} | awk -F\"</TD>\" {'print \$1'}";
+  $entitlementdate = `$url`;
+  
+  return $entitlementdate;
+}
+
+# Get actual date 
+sub now {
+  my $FORMAT=$_[0];
+
+  my $NOW=timelocal(localtime);
+  my $y=sprintf("%02d",(localtime($NOW))[5]-100);
+  my $Y=sprintf("%04d",(localtime($NOW))[5]+1900);
+  my $m=sprintf("%02d",(localtime($NOW))[4]+1);
+  my $d=sprintf("%02d",(localtime($NOW))[3]);
+  my $H=sprintf("%02d",(localtime($NOW))[2]);
+  my $M=sprintf("%02d",(localtime($NOW))[1]);
+  my $S=sprintf("%02d",(localtime($NOW))[0]);
+
+  $FORMAT =~ s/%y/$y/; #Year 2 charater
+  $FORMAT =~ s/%Y/$Y/; #Year 4 charater
+  $FORMAT =~ s/%m/$m/; #Month (1-12)
+  $FORMAT =~ s/%d/$d/; #Day (1-31)
+  $FORMAT =~ s/%H/$H/; #Hour (0-23)
+  $FORMAT =~ s/%M/$M/; #Minutes (0-59)
+  $FORMAT =~ s/%S/$S/; #Seconds (0-59)
+
+  return $FORMAT;
+}
+

@@ -6,8 +6,6 @@ Icinga / Nagios Plugin for checking Entitlement of an paytv subscription on a ru
   - select reader
   - select subscription
 
-This text you see here is *actually* written in Markdown! To get a feel for Markdown's syntax, type some text into the left window and watch the results in the right.
-
 ### Version
 1.0
 

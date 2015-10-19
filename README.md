@@ -41,7 +41,7 @@ object CheckCommand "oscam" {
 }
 ```
 
-### Use plugin with host
+### Use plugin
 
 ```sh
 object Service "Entitlement Sky" {

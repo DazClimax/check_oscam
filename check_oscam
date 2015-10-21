@@ -42,7 +42,7 @@ if ($hostname and $user and $password and $reader and $subscription) {
 sub print_help{
   print "\n";
   print "Usage:\n";
-  print "  check_oscam -H <IP> -u <user> -p <password> -r <reader -s <id> [-w <days>] [-c <days>]\n";
+  print "  check_oscam -H <IP> -u <user> -p <password> -r <reader -i <id> [-w <days>] [-c <days>]\n";
   print "  check_oscam [-h | --help]\n";
   print "\n";
   print "  Warning and critical values are optional, default warning is 14 days and default critial is 1 day all other values are needed\n";
@@ -102,21 +102,13 @@ sub now {
   my $FORMAT=$_[0];
 
   my $NOW=timelocal(localtime);
-  my $y=sprintf("%02d",(localtime($NOW))[5]-100);
   my $Y=sprintf("%04d",(localtime($NOW))[5]+1900);
   my $m=sprintf("%02d",(localtime($NOW))[4]+1);
   my $d=sprintf("%02d",(localtime($NOW))[3]);
-  my $H=sprintf("%02d",(localtime($NOW))[2]);
-  my $M=sprintf("%02d",(localtime($NOW))[1]);
-  my $S=sprintf("%02d",(localtime($NOW))[0]);
 
-  $FORMAT =~ s/%y/$y/; #Year 2 charater
   $FORMAT =~ s/%Y/$Y/; #Year 4 charater
   $FORMAT =~ s/%m/$m/; #Month (1-12)
   $FORMAT =~ s/%d/$d/; #Day (1-31)
-  $FORMAT =~ s/%H/$H/; #Hour (0-23)
-  $FORMAT =~ s/%M/$M/; #Minutes (0-59)
-  $FORMAT =~ s/%S/$S/; #Seconds (0-59)
 
   return $FORMAT;
 }

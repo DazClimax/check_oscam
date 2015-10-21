@@ -13,7 +13,7 @@ releases:
     files: 
       - 
         name: check_oscam
-        url: "file:///https://github.com/DazClimax/check_oscam/archive/1.1.tar.gz"
+        url: "https://github.com/DazClimax/check_oscam/archive/1.1.tar.gz"
         description: "Bug fix"
         checksum: f2dcd9177276419aecdb95c5d801641b
 

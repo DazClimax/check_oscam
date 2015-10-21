@@ -9,12 +9,14 @@ use Getopt::Long;
 use Scalar::MoreUtils qw(empty);
 
 #Define variabels
+my $PROGRAMVERSION = "1.1";
 my $hostname = "";
 my $user = "";
 my $password ="";
 my $reader = "";
 my $subscription = "";
 my $help = "";
+my $version = "";
 my $warningtime = 14; #days
 my $criticaltime = 1; #days
 
@@ -28,26 +30,39 @@ GetOptions(
          "i=s"	=> \$subscription, 	"subscription" 	=> \$subscription,
          "w=i"	=> \$warningtime, 	"warningtime" 	=> \$warningtime,
          "c=i"	=> \$criticaltime, 	"criticaltime" 	=> \$criticaltime,
+         "v"	=> \$version,	 	"version" 	=> \$version,
 	 "h"	=> \$help,		"help"		=> \$help);
 
 # Check variables and start checking oscam
 if ($hostname and $user and $password and $reader and $subscription) {
   check_entitlement();
   exit;
-} elsif ($help or empty($help)){
+} elsif ($version) {
+  print_version();
+  exit;
+} elsif ($help or empty($help)) {
   print_help();
+}
+
+sub print_version{
+  print "\n";
+  print "Program: check_oscam version ".$PROGRAMVERSION."\n";
+  print "\n";
 }
 
 # Print help
 sub print_help{
   print "\n";
+  print "Program: check_oscam version ".$PROGRAMVERSION."\n";
+  print "\n";
   print "Usage:\n";
   print "  check_oscam -H <IP> -u <user> -p <password> -r <reader -i <id> [-w <days>] [-c <days>]\n";
   print "  check_oscam [-h | --help]\n";
+  print "  check_oscam [-v | --version]\n";
   print "\n";
   print "  Warning and critical values are optional, default warning is 14 days and default critial is 1 day all other values are needed\n";
   print "\n";
-  exit;
+  exit 0;
 }
 
 #Check the Entitlement

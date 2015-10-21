@@ -9,6 +9,10 @@ Icinga / Nagios Plugin for checking Entitlement of an paytv subscription on a ru
 ### Version
 1.1
 
+### Release notes
+Small bugfix wrong character for id parameter, function help print s instead of i.
+Reduce date function and add version to script.
+
 ### Installation
 
 Copy to your plugin folder

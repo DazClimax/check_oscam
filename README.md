@@ -7,7 +7,7 @@ Icinga / Nagios Plugin for checking Entitlement of an paytv subscription on a ru
   - select subscription
 
 ### Version
-1.0
+1.1
 
 ### Installation
 

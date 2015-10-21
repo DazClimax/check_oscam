@@ -24,7 +24,7 @@ $ git clone https://github.com/DazClimax/check_oscam.git
 ### Define plugin in icinga
 
 ```sh
-object CheckCommand "oscam" {
+object CheckCommand "COMANDNAME" {
            import "plugin-check-command"
 
            command = [ PluginDir + "/check_oscam" ]
@@ -48,8 +48,8 @@ object CheckCommand "oscam" {
 ```sh
 object Service "Entitlement NAME" {
          import "generic-service"
-         host_name = "OSCAM"
-         check_command = "oscam"
+         host_name = "HOSTNAME"
+         check_command = "COMANDNAME"
          vars.sla = "24x7"
  
           vars += {

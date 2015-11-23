@@ -1,4 +1,4 @@
-#! /usr/bin/perl -w
+#!/usr/bin/perl -w
 
 use strict;
 use warnings;
@@ -9,29 +9,29 @@ use Getopt::Long;
 use Scalar::MoreUtils qw(empty);
 
 #Define variabels
-my $PROGRAMVERSION = "1.1";
-my $hostname = "";
-my $user = "";
-my $password ="";
-my $reader = "";
-my $subscription = "";
-my $help = "";
-my $version = "";
-my $warningtime = 14; #days
-my $criticaltime = 1; #days
+our $PROGRAMVERSION = "1.1";
+our $hostname = "";
+our $user = "";
+our $password ="";
+our $reader = "";
+our $subscription = "";
+our $help = "";
+our $version = "";
+our $warningtime = 14; #days
+our $criticaltime = 1; #days
 
 # Read variables
 Getopt::Long::Configure('bundling');
 GetOptions(
-         "H=s"	=> \$hostname,		"hostname"	=> \$hostname,
-         "u=s"	=> \$user,		"user"		=> \$user,
-         "p=s"	=> \$password,		"password"      => \$password,
-         "r=s"	=> \$reader, 		"reader" 	=> \$reader,
-         "i=s"	=> \$subscription, 	"subscription" 	=> \$subscription,
-         "w=i"	=> \$warningtime, 	"warningtime" 	=> \$warningtime,
-         "c=i"	=> \$criticaltime, 	"criticaltime" 	=> \$criticaltime,
-         "v"	=> \$version,	 	"version" 	=> \$version,
-	 "h"	=> \$help,		"help"		=> \$help);
+         "H=s"  => \$hostname,          "hostname"      => \$hostname,
+         "u=s"  => \$user,              "user"          => \$user,
+         "p=s"  => \$password,          "password"      => \$password,
+         "r=s"  => \$reader,            "reader"        => \$reader,
+         "i=s"  => \$subscription,      "subscription"  => \$subscription,
+         "w=i"  => \$warningtime,       "warningtime"   => \$warningtime,
+         "c=i"  => \$criticaltime,      "criticaltime"  => \$criticaltime,
+         "v"    => \$version,           "version"       => \$version,
+         "h"    => \$help,              "help"          => \$help);
 
 # Check variables and start checking oscam
 if ($hostname and $user and $password and $reader and $subscription) {
@@ -67,23 +67,25 @@ sub print_help{
 
 #Check the Entitlement
 sub check_entitlement{
-  my ($hours, $status, $daysleft);
-  
+  my ($hours, $status, $daysleft, $expiredate);
+
   $hours = get_diff();
   $daysleft = round($hours / 24);
-  
+  $expiredate = get_entitlementdate();
+  chomp($expiredate);
 
-  if ($hours > ($warningtime * 24)) {
-    print "Entitlement OK: Entitlement expire at ".get_entitlementdate().$daysleft." days left before update of Entitlement is needed";
-    print "\n";
-    exit 0;
-  } elsif ($hours < ($criticaltime * 24)) {
-    print "Entitlement CRTITICAL: Entitlement expire at ".get_entitlementdate().$daysleft."days left before update of Entitlement is needed";
-    print "\n";
+  if ($hours < 0 ) {
+    print "Entitlement CRTITICAL: Entitlement expired at ".$expiredate.".|0;;;;\n";
     exit 2;
-  } elsif ($hours < ($warningtime * 24)) {
-    print "Entitlement WARNING: Entitlement expire at ".get_entitlementdate().$daysleft." days left before update of Entitlement is needed";
-    print "\n";
+  }
+  if ($hours > ($warningtime * 24)) {
+    print "Entitlement OK: Entitlement expire at ".$expiredate.". ".$daysleft." days left before update of Entitlement is needed.|".$daysleft.";;;;\n";
+    exit 0;
+  } elsif ($hours <= ($criticaltime * 24)) {
+    print "Entitlement CRTITICAL: Entitlement expire at ".$expiredate.". ".$daysleft." days left before update of Entitlement is needed.|".$daysleft.";;;;\n";
+    exit 2;
+  } elsif ($hours <= ($warningtime * 24)) {
+    print "Entitlement WARNING: Entitlement expire at ".$expiredate.". ".$daysleft." days left before update of Entitlement is needed.|".$daysleft.";;;;\n";
     exit 1;
   }
 }
@@ -91,28 +93,27 @@ sub check_entitlement{
 # Get the time between the Entitlement is gone and the actual date in hours
 sub get_diff{
   my ($entitlementdate, $actualdate, $predelta, $hours, @delta);
-  
+
   $entitlementdate = ParseDate(get_entitlementdate());
   $actualdate = ParseDate(now("%Y-%m-%d"));
   $predelta = DateCalc($actualdate,$entitlementdate);
-  
   @delta=split(/:/,$predelta);
-  $hours = $delta[4];
-  
+  $hours = $delta[4]+(24*$delta[3])+(7*24*$delta[2]);
+
   return $hours;
 }
 
 # Get Entitlmentdate from oscam
 sub get_entitlementdate{
   my ($url, $entitlementdate);
-  
-  $url = "curl --digest -s -u ".$user.":".$password." http://".$hostname."/entitlements.html?label=".$reader. " | grep \".$subscription.\" | awk -F\"<TD>\" {'print \$8'} | awk -F\"</TD>\" {'print \$1'}";
+
+  $url = "curl --digest -s -u ".$user.":".$password." http://".$hostname."/entitlements.html?label=".$reader. " | grep tier | awk -F\"<TD>\" {'print \$5,\$8'} |  grep \".$subscription.\" | awk -F\"</TD>\" {'print \$2'}";
   $entitlementdate = `$url`;
-  
+
   return $entitlementdate;
 }
 
-# Get actual date 
+# Get actual date
 sub now {
   my $FORMAT=$_[0];
 
@@ -127,4 +128,3 @@ sub now {
 
   return $FORMAT;
 }
-

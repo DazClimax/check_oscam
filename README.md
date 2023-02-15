@@ -18,7 +18,7 @@ Reduce date function and add version to script.
 Copy to your plugin folder
 
 ```sh
-$ git clone https://github.com/DazClimax/check_oscam.git
+git clone https://github.com/DazClimax/check_oscam.git
 ```
 
 ### Define plugin in icinga
